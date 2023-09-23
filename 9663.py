@@ -1,30 +1,40 @@
+# 9663_N-Queen
+
+import sys
+
+input = sys.stdin.readline
 n = int(input())
-# 퀸의 이동 경로에 있는 다른 퀸 저장
-straight = [False] * n
-horizontal1 = [False] * (2 * n)
-horizontal2 = [False] * (2 * n)
 
-cnt = 0  # 경우의 수 저장
+# 진행방향에 퀸이 놓여 있는 지 아닌 지 저장하는 리스트들
+vertical = [False] * n  # column
+diagonal_1 = [False] * (2 * n)  # 왼쪽 아래로 가는 대각선 방향
+diagonal_2 = [False] * (2 * n)  # 오른쪽 아래로 가는 대각선 방향
+cnt = 0  # 경우의 수 저장 위한 변수
 
 
-def search(k):  # k번째 row에 퀸 배치
+# k번째 줄에 퀸을 놓았을 때 다른 퀸을 확인하는 함수
+def search(k):
     global cnt
-    if k == n:  # n개 다 놓는 데에 성공한 경우
+    # 모든 퀸을 놓을 수 있으면
+    if k == n:
+        # 경우의 수 추가
         cnt += 1
         return
-
-    for i in range(n):  # (k, i)에 퀸 배치
-        if straight[i] or horizontal1[k + i] or horizontal2[i - k]:
+    # (k, i)에 퀸을 놓았을 때
+    for i in range(n):
+        # 퀸의 진행 방향에 다른 퀸이 있다면 무시
+        if vertical[i] or diagonal_1[k + i] or diagonal_2[k - i + n - 1]:
             continue
-        straight[i] = True
-        horizontal1[k + i] = True
-        horizontal2[i - k] = True
+        # 아니라면 탐색 진행
+        vertical[i] = True
+        diagonal_1[k + i] = True
+        diagonal_2[k - i + n - 1] = True
         search(k + 1)
-        straight[i] = False
-        horizontal1[k + i] = False
-        horizontal2[i - k] = False
+        # 다음 row까지 탐색 끝났으면 위치 해제
+        vertical[i] = False
+        diagonal_1[k + i] = False
+        diagonal_2[k - i + n - 1] = False
 
 
-# (0,0)에 놓는 경우부터 탐색
-search(0)
+search(0)  # (0, 0)부터 퀸 놓기 시작
 print(cnt)
