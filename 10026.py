@@ -8,6 +8,7 @@ dx = [-1, 1, 0, 0]
 dy = [0, 0, -1, 1]
 
 
+# 같은 구역 내에 좌표들을 탐색하는 함수
 def bfs(x, y, board):
     queue = deque()  # bfs탐색을 위한 큐
     queue.append((x, y, board[x][y]))  # 그 전 좌표의 색깔과 비교 위해 색깔도 큐에 함께 넣음
