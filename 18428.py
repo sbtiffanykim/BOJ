@@ -1,63 +1,88 @@
 # 18428_감시 피하기
 # https://www.acmicpc.net/problem/18428
 
-import sys
-
-input = sys.stdin.readline
+from collections import deque
 
 dx = [-1, 1, 0, 0]
 dy = [0, 0, -1, 1]
 
 
-# bfs로 선생님이 학생들을 발견할 수 있는 지 확인하는 함수
+def bfs():
+    queue = deque()
+    for i in range(n):
+        for j in range(n):
+            if board[i][j] == "T":  # 선생님이 있는 좌표 큐에 삽입
+                queue.append((i, j))
+
+    while queue:
+        x, y = queue.popleft()
+        for i in range(4):
+            possible = False
+            for j in range(1, n):
+                nx = x + j * (dx[i])
+                ny = y + j * (dy[i])
+                if nx < 0 or nx >= n or ny < 0 or ny >= n:
+                    continue
+                if board[nx][ny] == "S":  # 학생을 발견한 경우
+                    return False  # 감시 피할 수 없음
+                elif board[nx][ny] == "O":
+                    possible = True
+                    break
+            if possible:  # 장애물에 가려져 있으면 다른 선생님으로 넘어감
+                break
+
+    return True  # 큐가 빌 때까지 모든 선생님이 학생을 발견할 수 없으면 종료
+
+
 def search():
-    for teacher in teachers:  # 선생님마다 확인
-        for i in range(4):  # 상하좌우 탐색
-            nx, ny = teacher
-            while 0 <= nx < n and 0 <= ny < n:  # 범위 내에서 탐색
+    for teacher in teachers:
+        x, y = teacher
+        for i in range(4):
+            for j in range(1, n):
+                nx = x + j * dx[i]
+                ny = y + j * dy[i]
+                # 범위 넘어가면 다음 방향 탐색
+                if nx < 0 or nx >= n or ny < 0 or ny >= n:
+                    break
                 # 학생을 만나면 false 반환하고 종료
                 if board[nx][ny] == "S":
                     return False
                 # 장애물 만나면 다음 방향 탐색
                 if board[nx][ny] == "O":
                     break
-                # 진행방향과 같은 방향으로 더 나아가도록 좌표 갱신
-                nx += dx[i]
-                ny += dy[i]
 
     return True  # 모든 선생님이 학생 발견하지 못하면 true 반환하고 종료
 
 
-# 3개의 장애물을 설치하면서 탐색하는 함수
-def dfs(depth):
+# 탐색
+def dfs(idx, depth):
     global flag
-
-    if depth == 3:  # 장애물 3개를 설치
+    if depth == 3:
         res = search()
-        if res:  # 탐색 성공한 경우
+        if res:
             flag = True
             return
-    else:  # backtracking
-        for i in range(n):
-            for j in range(n):
-                if board[i][j] == "X":
-                    board[i][j] = "O"
-                    dfs(depth + 1)
-                    board[i][j] = "X"
+    else:
+        for i in range(idx, len(blank)):  # 백트래킹
+            board[blank[i][0]][blank[i][1]] = "O"
+            dfs(i + 1, depth + 1)
+            board[blank[i][0]][blank[i][1]] = "X"
 
 
 n = int(input())
 board = [list(input().split()) for _ in range(n)]
+blank = list()
 teachers = list()
 flag = False
 
 for i in range(n):
     for j in range(n):
-        if board[i][j] == "T":
+        if board[i][j] == "X":
+            blank.append((i, j))
+        elif board[i][j] == "T":
             teachers.append((i, j))
 
-dfs(0)
-
+dfs(0, 0)
 if flag:
     print("YES")
 else:
